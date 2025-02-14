@@ -19,7 +19,7 @@ public class EmployeeController implements IEmployeeController {
 
     @GetMapping("/{id}")
     @Override
-    public DtoEmployee findEmployeeById(@Valid @NotEmpty @PathVariable(value = "id") long id) {
+    public DtoEmployee findEmployeeById( @PathVariable(value = "id") long id) {
         return employeeServices.findEmployeeById(id);
     }
 }
