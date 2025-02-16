@@ -1,5 +1,6 @@
 package com.furkanarslan.jwt.config;
 
+import com.furkanarslan.jwt.jwt.AuthEntryPoint;
 import com.furkanarslan.jwt.jwt.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +20,8 @@ public class SecurityConfig {
     private AuthenticationProvider authenticationProvider ;
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
+    @Autowired
+    private AuthEntryPoint authEntryPoint ;
 
     public static final String authenticate = "/authenticate";
     public static final String register = "/register";
@@ -26,18 +29,23 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
-
-                .authorizeHttpRequests(request ->
-                        request.requestMatchers(authenticate, register)
-                                .permitAll()
-                                .anyRequest()
-                                .authenticated())
-                .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(request -> request
+                        .requestMatchers(authenticate, register).permitAll()
+                        .anyRequest().authenticated()
+                )
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(authEntryPoint)
+                )
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-                return null;
-    }
+        return http.build();
+
+
+}
 
 
 
