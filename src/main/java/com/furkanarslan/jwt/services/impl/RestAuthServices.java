@@ -1,10 +1,12 @@
 package com.furkanarslan.jwt.services.impl;
 
 import com.furkanarslan.jwt.dto.DtoUser;
+import com.furkanarslan.jwt.entity.RefreshToken;
 import com.furkanarslan.jwt.entity.User;
 import com.furkanarslan.jwt.jwt.AuthRequest;
 import com.furkanarslan.jwt.jwt.AuthResponse;
 import com.furkanarslan.jwt.jwt.JwtServices;
+import com.furkanarslan.jwt.repository.RefreshTokenRepository;
 import com.furkanarslan.jwt.repository.UserRepository;
 import com.furkanarslan.jwt.services.IRestAuthServices;
 import org.springframework.beans.BeanUtils;
@@ -15,7 +17,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class RestAuthServices implements IRestAuthServices {
@@ -25,6 +29,20 @@ private UserRepository userRepository;
 private BCryptPasswordEncoder passwordEncoder;
 @Autowired
 private AuthenticationProvider authenticationProvider;
+@Autowired
+private RefreshTokenRepository refreshTokenRepository;
+
+
+private RefreshToken createRefreshToken(User user) {
+    RefreshToken refreshToken = new RefreshToken();
+
+    refreshToken.setRefreshToken(UUID.randomUUID().toString());
+    refreshToken.setExpireDate(new Date(System.currentTimeMillis()+ 1000*60*60*4));
+    refreshToken.setUser(user);
+return refreshToken;
+}
+
+
 
 
     @Override
@@ -37,9 +55,13 @@ try {
 
     Optional<User> optional = userRepository.findByUsername(request.getUsername());
     JwtServices jwtServices = new JwtServices();
-     String token= jwtServices.generateToken(optional.get());
+     String accsessToken= jwtServices.generateToken(optional.get());
 
-return new AuthResponse(token);
+      RefreshToken refreshToken  = createRefreshToken(optional.get());
+      refreshTokenRepository.save(refreshToken);
+
+return new AuthResponse(accsessToken,refreshToken.getRefreshToken());
+
 
 }
 catch (Exception e) {

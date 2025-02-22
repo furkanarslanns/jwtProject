@@ -25,6 +25,7 @@ public class SecurityConfig {
 
     public static final String authenticate = "/authenticate";
     public static final String register = "/register";
+    public static final String REFRESH_TOKEN = "/refreshToken";
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
