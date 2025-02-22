@@ -26,12 +26,17 @@ public class SecurityConfig {
     public static final String authenticate = "/authenticate";
     public static final String register = "/register";
     public static final String REFRESH_TOKEN = "/refreshToken";
-
+    public static final String[] SWAGGER_PATHS = {
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "swagger-ui.html",
+    };
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(authenticate, register,REFRESH_TOKEN).permitAll()
+                        .requestMatchers(SWAGGER_PATHS).permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception
